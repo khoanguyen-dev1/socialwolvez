@@ -5,10 +5,7 @@ import json
 
 app = Flask(__name__)
 
-def fetch_key_value(url, api_key):
-    if api_key != "phantruongdpzai":
-        return jsonify({"error": "Invalid API key"}), 403
-    
+def fetch_key_value(url):
     if not url:
         return jsonify({'error': 'Missing parameter: url'}), 400
 
@@ -43,11 +40,10 @@ def fetch_key_value(url, api_key):
 
 @app.route('/bypass', methods=['GET'])
 def socialwolvez():
-    api_key = request.args.get("api_key")
     url = request.args.get('url')
 
     # Gọi hàm fetch_key_value và trả về giá trị
-    return fetch_key_value(url, api_key)
+    return fetch_key_value(url)
 
 if __name__ == '__main__':
     app.run(debug=True)
