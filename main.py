@@ -5,7 +5,10 @@ import json
 
 app = Flask(__name__)
 
-def fetch_key_value(url):
+@app.route('/socialwolvez', methods=['GET'])
+def socialwolvez():
+    url = request.args.get('url')
+    
     if not url:
         return jsonify({'error': 'Missing parameter: url'}), 400
 
@@ -19,14 +22,12 @@ def fetch_key_value(url):
         if script_tag and script_tag.string:
             try:
                 data = json.loads(script_tag.string)
-                print("Data received:", data)  # In ra dữ liệu để kiểm tra cấu trúc
+                
+                extracted_url = data[5]
+                extracted_name = data[6]
 
-                # Kiểm tra xem dữ liệu có phải là danh sách hay không
-                if isinstance(data, list) and len(data) > 6:
-                    extracted_url = data[5]
-                    extracted_name = data[6]
-
-                    return jsonify({'bypassed_url': extracted_url, 'name': extracted_name})
+                if extracted_url and extracted_name:
+                    return jsonify({'result': extracted_url, 'name': extracted_name})
                 else:
                     return jsonify({'error': 'Required data not found in the JSON structure.'}), 500
 
@@ -38,12 +39,5 @@ def fetch_key_value(url):
     except requests.RequestException as e:
         return jsonify({'error': 'Failed to make request to the provided URL.', 'details': str(e)}), 500
 
-@app.route('/bypass', methods=['GET'])
-def socialwolvez():
-    url = request.args.get('url')
-
-    # Gọi hàm fetch_key_value và trả về giá trị
-    return fetch_key_value(url)
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
