@@ -8,15 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/",
-      "dest": "/main.py"
-    },
-    {
-      "src": "/index.html",
-      "dest": "/main.py"
-    },
-    {
-      "src": "/api/(.*)",
+      "src": "/socialwolvez",
       "dest": "/main.py"
     }
   ]
