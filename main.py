@@ -1,45 +1,13 @@
-import logging
-from flask import Flask, request, jsonify, render_template
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_cors import CORS
-import os
+from flask import Flask, request, jsonify
 import requests
 from bs4 import BeautifulSoup
-
+import json
 
 app = Flask(__name__)
-CORS(app)
-key_regex = r'let content = \("([^"]+)"\);'
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
-port = int(os.getenv('PORT', 8080))
 
-# Cấu hình logging
-logger = logging.getLogger('api_usage')
-logger.setLevel(logging.INFO)
-
-log_file_path = '/tmp/api_usage.log'
-file_handler = logging.FileHandler(log_file_path)
-file_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
-
-
-def get_client_ip():
-    """Hàm để lấy địa chỉ IP của client, xem xét cả trường hợp đằng sau proxy."""
-    if request.headers.getlist("X-Forwarded-For"):
-        ip = request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip()
-    else:
-        ip = request.remote_addr
-    return ip
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/socialwolvez', methods=['GET'])
-def socialwolvez():
-    url = request.args.get('url')
+def fetch_key_value(url, api_key):
+    if api_key != "phantruongdpzai":
+        return jsonify({"error": "Invalid API key"}), 403
     
     if not url:
         return jsonify({'error': 'Missing parameter: url'}), 400
@@ -54,12 +22,14 @@ def socialwolvez():
         if script_tag and script_tag.string:
             try:
                 data = json.loads(script_tag.string)
-                
-                extracted_url = data[5]
-                extracted_name = data[6]
+                print("Data received:", data)  # In ra dữ liệu để kiểm tra cấu trúc
 
-                if extracted_url and extracted_name:
-                    return jsonify({'result': extracted_url, 'name': extracted_name})
+                # Kiểm tra xem dữ liệu có phải là danh sách hay không
+                if isinstance(data, list) and len(data) > 6:
+                    extracted_url = data[5]
+                    extracted_name = data[6]
+
+                    return jsonify({'bypassed_url': extracted_url, 'name': extracted_name})
                 else:
                     return jsonify({'error': 'Required data not found in the JSON structure.'}), 500
 
@@ -70,9 +40,14 @@ def socialwolvez():
 
     except requests.RequestException as e:
         return jsonify({'error': 'Failed to make request to the provided URL.', 'details': str(e)}), 500
+
+@app.route('/bypass', methods=['GET'])
+def socialwolvez():
+    api_key = request.args.get("api_key")
+    url = request.args.get('url')
+
+    # Gọi hàm fetch_key_value và trả về giá trị
+    return fetch_key_value(url, api_key)
+
 if __name__ == '__main__':
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=False  # Đảm bảo rằng debug=False trong môi trường sản xuất
-    )
+    app.run(debug=True)
