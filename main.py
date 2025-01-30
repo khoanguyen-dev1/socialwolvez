@@ -4,9 +4,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_cors import CORS
 import os
 import requests
-import time
-import re
-import random
+from bs4 import BeautifulSoup
+import json
 
 app = Flask(__name__)
 CORS(app)
