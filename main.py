@@ -40,4 +40,4 @@ def socialwolvez():
         return jsonify({'error': 'Failed to make request to the provided URL.', 'details': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='0.0.0.0',port=port,debug=False)
