@@ -8,8 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/socialwolvez",
-      "dest": "/main.py"
+      "src": "/(.*)",
+      "dest": "main.py"
     }
   ]
-}
+} 
